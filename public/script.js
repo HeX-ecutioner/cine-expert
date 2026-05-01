@@ -20,6 +20,7 @@ async function loadStats() {
             document.getElementById('valTotalRatings').innerText = data.total_ratings;
             document.getElementById('valUniqueUsers').innerText = data.unique_users;
 
+
             const tbody = document.getElementById('top5TableBody');
             tbody.innerHTML = '';
             data.top5_movies.forEach(movie => {
