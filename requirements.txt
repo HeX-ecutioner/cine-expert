@@ -1,7 +1,8 @@
-streamlit
-numpy
+fastapi
+uvicorn
 pandas
+numpy
 scikit-learn
 requests
 Pillow
-rapidfuzz
+python-dotenv

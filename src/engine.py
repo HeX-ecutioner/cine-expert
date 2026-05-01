@@ -1,29 +1,29 @@
+import re
 import numpy as np
-import pandas as pd
-import streamlit as st
 from difflib import SequenceMatcher
-from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 try:
     from rapidfuzz import process, fuzz
+
     USE_RAPIDFUZZ = True
 except:
     USE_RAPIDFUZZ = False
 
-@st.cache_data(show_spinner=False)
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
 def compute_content_features(movies_df):
-    def split_genres(s):
-        return [] if s == "(no genres listed)" else s.split("|")
+    # Initialize TF-IDF, removing common English stop words (the, and, is)
+    tfidf = TfidfVectorizer(stop_words="english")
 
-    genres_list = movies_df["genres"].apply(split_genres)
-    mlb = MultiLabelBinarizer()
-    genre_matrix = pd.DataFrame(
-        mlb.fit_transform(genres_list), columns=mlb.classes_, index=movies_df.index
-    )
-    return genre_matrix.fillna(0).astype(np.float32).values
+    # Fit the vectorizer on our new metadata soup
+    tfidf_matrix = tfidf.fit_transform(movies_df["metadata"])
 
-@st.cache_data(show_spinner=False)
+    # Return as an array for the cosine_similarity function
+    return tfidf_matrix.toarray().astype(np.float32)
+
+
 def compute_collaborative_features(movies_df, ratings_df):
     item_user_matrix = ratings_df.pivot(
         index="movieId", columns="userId", values="rating"
@@ -33,7 +33,7 @@ def compute_collaborative_features(movies_df, ratings_df):
     normalized = normalized.fillna(0)
     return normalized.astype(np.float32).values
 
-@st.cache_data(show_spinner=False)
+
 def aggregate_ratings(ratings_df):
     agg = ratings_df.groupby("movieId").rating.agg(["mean", "count"]).reset_index()
     agg.rename(columns={"mean": "avg_rating", "count": "num_ratings"}, inplace=True)
@@ -47,7 +47,6 @@ def aggregate_ratings(ratings_df):
 
     return agg
 
-import re
 
 def find_movie_index(movie_title, movies_df):
     titles = movies_df["title_clean"]
@@ -56,9 +55,11 @@ def find_movie_index(movie_title, movies_df):
     exact = movies_df[movies_df["title_search"] == search_query]
     if not exact.empty:
         return exact.index[0]
-        
-    normalized_query = re.sub(r'[^a-z0-9]', '', search_query)
-    normalized_titles = movies_df["title_search"].apply(lambda x: re.sub(r'[^a-z0-9]', '', str(x)))
+
+    normalized_query = re.sub(r"[^a-z0-9]", "", search_query)
+    normalized_titles = movies_df["title_search"].apply(
+        lambda x: re.sub(r"[^a-z0-9]", "", str(x))
+    )
     exact_norm = movies_df[normalized_titles == normalized_query]
     if not exact_norm.empty:
         return exact_norm.index[0]
@@ -79,6 +80,7 @@ def find_movie_index(movie_title, movies_df):
     )
 
     return contains.sort_values("match_score", ascending=False).index[0]
+
 
 def recommend_hybrid(
     movie_title,

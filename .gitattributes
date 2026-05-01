@@ -1,0 +1,3 @@
+* text=auto eol=lf
+*.csv linguist-documentation=false
+*.csv linguist-detectable

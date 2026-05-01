@@ -1,11 +1,14 @@
-import base64
+import os
 import re
+import base64
 import requests
 import pandas as pd
-import streamlit as st
-from difflib import SequenceMatcher
 from PIL import Image
 from io import BytesIO
+from functools import lru_cache
+from dotenv import load_dotenv
+from difflib import SequenceMatcher
+
 
 def get_base64_of_bin_file(bin_file):
     try:
@@ -15,17 +18,28 @@ def get_base64_of_bin_file(bin_file):
     except:
         return ""
 
+
 def clean_title(title):
     return re.sub(r"\(\d{4}\)", "", title).strip()
 
+
 def fix_title_display(title):
-    if title.endswith(", The"):
-        return "The " + title[:-5]
-    if title.endswith(", A"):
-        return "A " + title[:-3]
-    if title.endswith(", An"):
-        return "An " + title[:-4]
+    # Separate the year if it exists at the end
+    match = re.search(r"^(.*?)(\s*\(\d{4}\))?$", title)
+    if match:
+        name = match.group(1)
+        year = match.group(2) or ""
+
+        if name.endswith(", The"):
+            name = "The " + name[:-5]
+        elif name.endswith(", A"):
+            name = "A " + name[:-3]
+        elif name.endswith(", An"):
+            name = "An " + name[:-4]
+
+        return name + year
     return title
+
 
 def best_match(results, clean_title, year=None):
     if not results:
@@ -41,14 +55,16 @@ def best_match(results, clean_title, year=None):
             best, best_score = r, score
     return best
 
+
 def render_stars(rating: float) -> str:
     full = int(rating)
     half = 1 if rating - full >= 0.5 else 0
     empty = 5 - full - half
     return "★" * full + ("⯨" if half else "") + "☆" * empty
 
-@st.cache_data(show_spinner=False)
-def fetch_poster_bytes(title, year, tmdb_api_key):
+
+@lru_cache(maxsize=500)
+def fetch_poster_url(title, year, tmdb_api_key):
     try:
         clean = clean_title(title)
         params = {"api_key": tmdb_api_key, "query": clean, "include_adult": False}
@@ -71,23 +87,21 @@ def fetch_poster_bytes(title, year, tmdb_api_key):
 
         match = best_match(results, clean, year)
         if match and match.get("poster_path"):
-            url = f"https://image.tmdb.org/t/p/w300{match['poster_path']}"
-            return requests.get(url, timeout=5).content
+            return f"https://image.tmdb.org/t/p/w300{match['poster_path']}"
 
     except Exception:
         pass
 
-    img = Image.new("RGB", (300, 450), color=(73, 109, 137))
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    return buf.getvalue()
+    return ""
+
 
 def get_image_from_bytes(img_bytes):
     return Image.open(BytesIO(img_bytes))
 
+
 def get_tmdb_api_key():
-    try:
-        tmdb = st.secrets.get("tmdb", {})
-        return tmdb.get("api_key", "")
-    except Exception:
-        return ""
+    # Load environment variables from .env file if it exists
+    load_dotenv()
+
+    # Return environment variable
+    return os.environ.get("TMDB_API_KEY", "")

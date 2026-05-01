@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender System</title>
+    <meta name="description"
+        content="Find the best movie recommendations using our AI-powered hybrid recommender system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <div class="header-title-row">
+                    <div class="header-icon">🎬</div>
+                    <h1>Movie Recommender System</h1>
+                </div>
+                <div class="project-metadata">
+                    <p><strong>Version:</strong> 2.0.0 (FastAPI Migration)</p>
+                    <p><strong>Tech Stack:</strong> Python, FastAPI, Vanilla JS</p>
+                    <p><strong>Description:</strong> A highly optimized, hybrid recommendation engine using both
+                        Content-Based Filtering (TF-IDF on movie metadata) and Collaborative Filtering to deliver highly
+                        accurate movie suggestions.</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <label class="theme-switch" title="Toggle Dark Mode">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="slider round"></span>
+                </label>
+                <img src="/favicon.jpg" alt="Movie Icon" onerror="this.style.display='none'">
+            </div>
+        </header>
+
+        <!-- Data Exploration -->
+        <div class="section-title">
+            <span>📊</span> Data Exploration
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Movies</div>
+                <div class="stat-value" id="valTotalMovies">...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Ratings</div>
+                <div class="stat-value" id="valTotalRatings">...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Unique Users</div>
+                <div class="stat-value" id="valUniqueUsers">...</div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size: 1.3rem;">
+            <span>🔝</span> Top 5 Most-Rated Movies
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title of Movie</th>
+                        <th>Number of Ratings</th>
+                        <th>Average Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="top5TableBody">
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Find Similar Movies -->
+        <div class="section-title" style="margin-top: 4rem;">
+            <span>🔍</span> Find Similar Movies
+        </div>
+
+        <div class="search-section">
+            <div class="search-left">
+                <label for="movieInput">Enter a movie you like:</label>
+                <div class="search-input-wrapper">
+                    <input type="text" id="movieInput" placeholder="Batman Begins"
+                        onkeypress="if(event.key === 'Enter') searchMovies()">
+                    <button class="icon-btn-search" onclick="searchMovies()" title="Search">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="search-right">
+                <div class="input-group">
+                    <div class="slider-label">
+                        <label for="ratingInput">Minimum Rating</label>
+                        <span class="slider-value" id="ratingVal">3.90</span>
+                    </div>
+                    <input type="range" id="ratingInput" min="0" max="5" step="0.1" value="3.9"
+                        oninput="document.getElementById('ratingVal').innerText = parseFloat(this.value).toFixed(2)">
+                </div>
+                <div class="input-group">
+                    <div class="slider-label">
+                        <label for="weightInput">Content vs Collaborative</label>
+                        <span class="slider-value" id="weightVal">0.65</span>
+                    </div>
+                    <input type="range" id="weightInput" min="0" max="1" step="0.05" value="0.65"
+                        oninput="document.getElementById('weightVal').innerText = parseFloat(this.value).toFixed(2)">
+                </div>
+            </div>
+        </div>
+
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing movies and generating recommendations...</p>
+        </div>
+
+        <!-- Recommendations View -->
+        <div id="resultsWrapper" style="display: none;">
+            <div class="results-header" id="resultsTitle">Top 5 recommendations for Batman Begins</div>
+            <div class="movie-grid" id="movieGrid"></div>
+
+            <div class="detailed-view" id="detailedView">
+                <div class="detailed-title">Detailed View of Top 10 Recommendations</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Title</th>
+                                <th>Genres</th>
+                                <th>Match (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMessage"
+            style="color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; text-align: center; display: none;">
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

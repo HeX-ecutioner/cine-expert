@@ -1,49 +1,42 @@
 # 🎬 Movie Recommender System
 
-A **hybrid movie recommender system** with content-based + collaborative filtering, built with Python and Streamlit. Enter a movie you like, and the app recommends similar movies along with their posters fetched from **TMDB**.
+A high-performance, decoupled **hybrid movie recommender system** featuring a **FastAPI backend** and a visually stunning **Vanilla JS + CSS frontend**. Enter a movie you like, and the engine recommends similar movies along with their dynamic posters fetched via the **TMDB API**.
 
 ## ✨ Features
 
-- 🎥 **MovieLens Small Dataset** integration (movies + ratings)  
-- 🤖 **Hybrid recommendation system** (content-based + collaborative filtering)  
-- 🧠 **Cosine similarity** on genres + user rating patterns  
-- ⭐ **Weighted rating system (IMDb-style)** for better ranking  
-- 🎚️ **Adjustable hybrid slider** (content vs collaborative balance)  
-- 🔍 **Improved movie matching** using RapidFuzz (with fallback to SequenceMatcher) 
-- 🖼️ **Poster display** using TMDB API  
-- 📊 **Top-rated movies table** and dataset insights  
-- 🖌️ Clean and responsive **Streamlit UI**
+- ⚡ **FastAPI Backend** — Lightweight, high-performance API perfectly suited for Vercel Serverless Functions.
+- 🎨 **Glorious UI** — Beautifully crafted, responsive interface featuring intense glassmorphism, fluid micro-animations, and a sleek Light/Dark mode slider toggle.
+- 🎥 **MovieLens Small Dataset** integration (movies, ratings, and tags).
+- 🤖 **Hybrid Recommendation System** (Content-based + Collaborative Filtering).
+- 🧠 **Metadata Soup (TF-IDF)** — Advanced content-filtering utilizing TF-IDF vectorization across movie genres, title tokens, and deep thematic tags.
+- ⭐ **Weighted Rating System (IMDb-style)** for high-quality ranking control.
+- 🎚️ **Adjustable Hybrid Slider** to dynamically balance content vs. collaborative influences on the fly.
+- 🖼️ **Poster Displays** dynamically requested and optimized through the TMDB API.
 
 ## 🧠 Recommendation Approach
 
-This app uses a **hybrid recommendation system**:
+This application utilizes a powerful **hybrid recommendation engine**:
 
-- **Content-based filtering** → recommends movies with similar genres  
-- **Collaborative filtering** → recommends movies liked by similar users  
-- **Hybrid scoring** → combines both using a weighted formula:
+- **Content-based filtering (TF-IDF)** → Generates recommendations based on the semantic metadata of the movie (genres, tags, and title semantics).
+- **Collaborative filtering** → Recommends movies liked by users with similar historical rating patterns.
+- **Hybrid scoring** → Intelligently merges both paradigms using a dynamic weighted formula:
 
 `Final Score = (w × Content Similarity) + ((1 - w) × Collaborative Similarity)`
 
-Users can adjust the balance using the **content vs collaborative slider** in the UI.
+Users can seamlessly adjust this balance (`w`) using the slider in the UI.
 
 ## ⚙️ How It Works
 
-1. Loads MovieLens dataset and extracts genres & year.  
-2. Builds a **content-based** representation using genre encoding.
-3. Builds a **collaborative filtering matrix** from user ratings.
-4. Applies **mean-centering** to normalize rating patterns.
-5. Computes similarity using **cosine similarity* *(on demand)***.
-6. Combines both signals using a **weighted hybrid score**.  
-7. Applies **IMDb-style weighted rating filtering** for quality control.  
-8. Fetches movie posters from TMDB using cleaned titles and year.  
-9. Displays:
+1. Loads the complete MovieLens dataset (automatically downloading it if necessary).
+2. Builds a **TF-IDF content matrix** from the rich metadata soup.
+3. Builds a **collaborative filtering matrix** based on user interactions.
+4. Computes semantic proximity using **cosine similarity**.
+5. Fuses the content and collaborative data points using a **weighted hybrid score**.
+6. Applies an **IMDb-style weighted rating filter** for stringent quality control.
+7. Fetches TMDB movie posters securely via backend environment variables.
+8. Frontend flawlessly renders:
     - 🎬 Top 5 recommendations (poster grid)
-    - 📊 Top 10 recommendations (detailed table)
-
-## 🖼️ Demo Screenshot
-
-![App Screenshot](assets/Screenshot.png)
-*Example layout showing top recommendations with posters.*
+    - 📊 Top 10 recommendations (detailed analytical table)
 
 ## 🚀 Getting Started
 
@@ -77,22 +70,26 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Add your TMDB API key in `.streamlit/secrets.toml`:
-
-```toml
-[tmdb]
-api_key = "YOUR_API_KEY_HERE"
-```
-
-### ▶️ Running the App
+4. Create your environment file by duplicating `.env.example`:
 
 ```bash
-streamlit run app.py
+cp .env.example .env
+```
+Add your TMDB API key inside `.env`:
+
+```bash
+TMDB_API_KEY="YOUR_API_KEY_HERE"
 ```
 
-- Enter a movie title (partial or full) in the input box.
-- Adjust the minimum rating filter and hybrid weight slider if desired.
-- View top 5 recommendations with posters and full top 10 table.
+### ▶️ Running the App Locally
+
+Start the highly optimized FastAPI development server (which also statically serves the frontend UI):
+
+```bash
+uvicorn api.index:app --reload
+```
+
+Then, seamlessly open `http://localhost:8000` in your browser!
 
 ## ℹ️ Additional Information
 
@@ -101,28 +98,23 @@ streamlit run app.py
 **MovieLens Small Dataset**
 
 Includes:
+- `movies.csv` — Movie titles & genres
+- `ratings.csv` — User ratings
+- `tags.csv` — Descriptive movie tags (metadata)
 
-- `movies.csv` — movie titles & genres
-- `ratings.csv` — user ratings
-
-The app automatically downloads the dataset if not present.
+The app intelligently handles the dataset structure, automatically downloading it securely to your local directory or temp environments if missing.
 
 ### 📦 Dependencies
 
-- streamlit
+- fastapi
+- uvicorn
 - numpy
 - pandas
 - scikit-learn
 - requests
 - pillow
-- rapidfuzz
+- python-dotenv
 
 ### ⚖️ License
 
 This app uses the [MIT License](LICENSE)
-
-### 🤝 Acknowledgements
-
-- MovieLens dataset
-- TMDB API
-- Built with Streamlit
