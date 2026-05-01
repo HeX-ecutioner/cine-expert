@@ -1,4 +1,4 @@
-# 🎬 Movie Recommender System
+# 🎬 Cine Expert
 
 A high-performance, decoupled **hybrid movie recommender system** featuring a **FastAPI backend** and a visually stunning **Vanilla JS + CSS frontend**. Enter a movie you like, and the engine recommends similar movies along with their dynamic posters fetched via the **TMDB API**.
 
