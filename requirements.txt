@@ -1,8 +1,10 @@
+numpy
+pandas
+pillow
 fastapi
 uvicorn
-pandas
-numpy
-scikit-learn
 requests
-Pillow
+pydantic
+rapidfuzz
+scikit-learn
 python-dotenv
